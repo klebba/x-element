@@ -4,8 +4,8 @@
  */
 
 import XElementProperties from './x-element-properties.js';
-import { render, html } from '../../node_modules/lit-html/lib/lit-extended.js';
-import { repeat } from '../../node_modules/lit-html/lib/repeat.js';
+import { render, html } from '../../lit-html/lib/lit-extended.js';
+import { repeat } from '../../lit-html/lib/repeat.js';
 
 export default class AbstractElement extends XElementProperties {
   render() {
