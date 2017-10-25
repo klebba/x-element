@@ -1,8 +1,8 @@
 {
   "name": "@klebba/x-element",
   "author": "Casey Klebba",
-  "description": "Native Web Component base Element",
-  "version": "1.0.0-rc.1",
+  "description": "Custom Element base class.",
+  "version": "1.0.0-rc.2",
   "license": "MIT",
   "repository": "klebba/x-element",
   "main": "x-element.js",
@@ -12,6 +12,19 @@
     "lint": "eslint --quiet .",
     "lint-strict": "eslint ."
   },
+  "directories": {
+    "test": "test"
+  },
+  "files": [
+    "/x-element.js",
+    "/x-element-basic.js",
+    "/x-element-properties.js",
+    "/etc",
+    "/demo",
+    "/index.html",
+    "/index.js",
+    "/index.css"
+  ],
   "dependencies": {
     "lit-html": "^0.7.1"
   },
