@@ -1,3 +1,13 @@
 # XElement
 
 A base class for creating Custom Elements.
+
+```
+npm install && npm start
+```
+
+Then...
+* http://localhost:8080
+* http://localhost:8080/demo
+* http://localhost:8080/demo/react
+* http://localhost:8080/test
