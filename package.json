@@ -2,13 +2,13 @@
   "name": "@klebba/x-element",
   "author": "Casey Klebba",
   "description": "Custom Element base class.",
-  "version": "1.0.0-rc.3",
+  "version": "1.0.0-rc.4",
   "license": "MIT",
   "repository": "klebba/x-element",
   "main": "x-element.js",
   "module": "x-element.js",
   "scripts": {
-    "start": "static . -c 0",
+    "start": "element-server",
     "lint": "eslint --quiet .",
     "lint-strict": "eslint ."
   },
@@ -31,6 +31,6 @@
   "devDependencies": {
     "eslint": "^4.9.0",
     "eslint-config-klebba": "^1.0.2",
-    "node-static": "^0.7.10"
+    "@klebba/element-server": "^1.0.2"
   }
 }
