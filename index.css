@@ -17,6 +17,7 @@ a:not(:hover) {
   flex-direction: column;
   align-items: center;
   margin: 2rem;
+  perspective: 1000px;
 }
 
 hello-world + hello-world {

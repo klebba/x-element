@@ -4,7 +4,7 @@ class Hello extends React.Component {
   render() {
     return React.createElement(
       'div',
-      {},
+      null,
       React.createElement('hello-world', { rank: this.props.rank }, null),
       React.createElement('hello-world', { rank: '\u2655' }, null),
       React.createElement('hello-world', {}, null)
@@ -16,10 +16,12 @@ ready(document).then(() => {
   const root = document.getElementById('root');
   ReactDOM.render(React.createElement(Hello, {}, null), root);
 
-  const ranks = ['\u2655', '\u2654', '\u2656', ''];
+  const ranks = ['\u2655', '\u2654', '\u2656', '\u2657', ''];
+  let counter = 0;
 
   setInterval(() => {
-    const rank = ranks[Math.floor(Math.random() * ranks.length)];
+    const rank = ranks[counter % ranks.length];
+    counter += 1;
     ReactDOM.render(React.createElement(Hello, { rank: rank }, null), root);
-  }, 250);
+  }, 1250);
 });

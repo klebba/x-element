@@ -1,3 +1,7 @@
+/**
+ * Implements property to attribute reflection.
+ */
+
 import XElementBasic from './x-element-basic.js';
 
 const caseMap = {};
@@ -58,6 +62,8 @@ export default class AbstractPropertiesElement extends XElementBasic {
         if (reflect) {
           if (type.name === 'Boolean') {
             return target.hasAttribute(attr);
+          } else if (type.name === 'String') {
+            return type(target.getAttribute(attr) || '');
           } else {
             return type(target.getAttribute(attr));
           }

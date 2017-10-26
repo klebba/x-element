@@ -1,6 +1,5 @@
 /**
- * Base element class which implements a naive template rendering system and
- * property to attribute reflection.
+ * Implements a naive template rendering system and a few helpers.
  */
 
 export default class AbstractBasicElement extends HTMLElement {
@@ -82,9 +81,7 @@ export default class AbstractBasicElement extends HTMLElement {
   static upgradeObservedAttributes(target) {
     const attrs = this.observedAttributes;
     if (Array.isArray(attrs)) {
-      attrs.forEach(attr => {
-        this.upgradeProperty(target, attr);
-      });
+      attrs.forEach(attr => this.upgradeProperty(target, attr));
     }
   }
 

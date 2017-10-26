@@ -1,6 +1,6 @@
 /**
- * Extension of the XElementProperties class which introduces templating using
- * the `lit-html` library for improved performance and functionality.
+ * Introduces template rendering using the `lit-html` library for improved
+ * performance and added functionality.
  */
 
 import XElementProperties from './x-element-properties.js';
