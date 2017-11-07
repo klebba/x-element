@@ -29,8 +29,12 @@ suite('scratch', ctx => {
   // Async data binding
   el.prop1 = null;
   el.render(); // force sync render
-  it('should update the DOM bindings', el.shadowRoot.querySelector('span').textContent === 'null');
-  el.prop1 = 'test';
+  it('should update the DOM bindings', el.shadowRoot.querySelector('span').textContent === '');
+  el.prop1 = 'test2';
   el.render(); // force sync render
-  it('should update the DOM bindings again', el.shadowRoot.querySelector('span').textContent === 'test');
+  it('should update the DOM bindings again', el.shadowRoot.querySelector('span').textContent === 'test2');
+
+  // complex properties
+  it('should allow array types', Array.isArray(el.arrayProp) && el.arrayProp[0] === 'foo');
+  it('should allow object types', el.objProp.foo === 'bar');
 });

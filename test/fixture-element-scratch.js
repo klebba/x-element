@@ -67,10 +67,15 @@ class TestElement extends XElement {
         value: 0,
         reflect: true,
       },
-      camelCaseProperty: {
-        type: String,
-        value: 'test',
-        reflect: true,
+      arrayProp: {
+        type: Array,
+        value: () => ['foo', 'bar'],
+      },
+      objProp: {
+        type: Object,
+        value: () => {
+          return { foo: 'bar' };
+        },
       },
     };
   }

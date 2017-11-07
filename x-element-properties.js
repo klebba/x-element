@@ -64,18 +64,23 @@ export default class AbstractPropertiesElement extends XElementBasic {
             return target.hasAttribute(attr);
           } else if (type.name === 'String') {
             return type(target.getAttribute(attr) || '');
-          } else {
+          } else if (type.name === 'Number') {
             return type(target.getAttribute(attr));
+          } else {
+            console.warn(`
+              Attempted to read "${prop}" as a reflected property,
+              but it is not a Boolean, String, or Number type.
+            `);
           }
         } else {
           return target[symbol];
         }
       },
-      set(rawValue) {
+      set(valueOrFn) {
         // Resolve values passed as functions
-        const value = rawValue instanceof Function ? rawValue() : rawValue;
+        const value = valueOrFn instanceof Function ? valueOrFn() : valueOrFn;
         // Apply the user-provided type function
-        const result = type(value);
+        const result = this.constructor.coerce(value, type);
         if (reflect) {
           if (type.name === 'Boolean') {
             if (result) {
@@ -83,7 +88,7 @@ export default class AbstractPropertiesElement extends XElementBasic {
             } else {
               target.removeAttribute(attr);
             }
-          } else {
+          } else if (type.name === 'String' || type.name === 'Number') {
             const isUndefined = value === undefined;
             const isNull = Object.is(value, null);
             const shouldReflect = !isUndefined && !isNull;
@@ -92,11 +97,16 @@ export default class AbstractPropertiesElement extends XElementBasic {
             } else {
               target.removeAttribute(attr);
             }
+          } else {
+            console.warn(`
+              Attempted to write "${prop}" as a reflected property,
+              but it is not a Boolean, String, or Number type.
+            `);
           }
         } else {
           target[symbol] = result;
         }
-
+        // mark template dirty
         target.invalidate();
       },
     });
@@ -105,13 +115,28 @@ export default class AbstractPropertiesElement extends XElementBasic {
     if (target.hasAttribute(prop)) {
       // read attributes configured before the accessor functions exist as
       // these values were not yet passed through the property -> attribute path.
+      // e.g. <element prop="initialValue"></element>
       target[prop] = this.deserialize(attr, target.getAttribute(attr), type);
     } else if (initialValue !== undefined) {
       // pass user provided initial state through the accessor
+      // e.g. element.prop = 'initialValue'
       target[prop] = initialValue;
     } else if (defaultValue !== undefined) {
       // pass element default through the accessor
+      // e.g. `properties: { prop: { value: 'initialValue' } }`
       target[prop] = defaultValue;
+    }
+  }
+
+  static coerce(value, type) {
+    if (type.name === 'Array') {
+      return Array.isArray(value) ? value : null;
+    } else if (type.name === 'Object') {
+      return Object.prototype.toString.call(value) === '[object Object]'
+        ? value
+        : null;
+    } else {
+      return type(value);
     }
   }
 
