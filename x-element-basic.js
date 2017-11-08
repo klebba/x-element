@@ -92,7 +92,8 @@ export default class AbstractBasicElement extends HTMLElement {
     if (target.hasOwnProperty(prop)) {
       const value = target[prop];
       // delete property so it does not shadow the element post-upgrade
-      delete target[prop];
+      // noop if the property is not configurable (e.g. already has accessors)
+      Reflect.deleteProperty(target, prop);
       target[prop] = value;
     }
   }
