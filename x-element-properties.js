@@ -11,8 +11,8 @@ const CAMEL_TO_DASH = /([A-Z])/g;
 export default class AbstractPropertiesElement extends XElementBasic {
   connectedCallback() {
     super.connectedCallback();
-    // only reflect attributes when the element is connected
-    // https://dom.spec.whatwg.org/#dom-node-isconnected
+    // Only reflect attributes when the element is connected
+    // See https://dom.spec.whatwg.org/#dom-node-isconnected
     this.constructor.initializeProperties(this);
   }
 
@@ -21,10 +21,18 @@ export default class AbstractPropertiesElement extends XElementBasic {
       const props = this.constructor.properties;
       const prop = this.constructor.dashToCamelCase(attr);
       const type = props[prop].type;
-      // ensure all attribute changes are processed by property accessors
-      // for frameworks like React which still set attributes instead of props
-      this[prop] = this.constructor.deserialize(attr, newValue, type);
+      // Ensure all attribute changes are processed by property accessors.
+      // This is required for frameworks which set attributes instead of props.
+      // Keeping properties in sync with attributes is less confusing too.
+      // NOTE: initial attribute values are processed in `connectedCallback`
+      if (this.propertiesInitialized) {
+        this[prop] = this.constructor.deserialize(attr, newValue, type);
+      }
     }
+  }
+
+  get propertiesInitialized() {
+    return this.__initialized;
   }
 
   static get properties() {
@@ -32,7 +40,7 @@ export default class AbstractPropertiesElement extends XElementBasic {
   }
 
   /**
-   * derives observed attributes using the `properties` definition block
+   * Derives observed attributes using the `properties` definition block
    * See https://developer.mozilla.org/en-US/docs/Web/Web_Components/Custom_Elements#Observed_attributes
    */
   static get observedAttributes() {
@@ -43,18 +51,19 @@ export default class AbstractPropertiesElement extends XElementBasic {
   }
 
   static initializeProperties(target) {
-    // configure user defined property getter/setters
+    // Configure user defined property getter/setters
     const props = target.constructor.properties;
     for (const prop in props) {
       const { type, value, reflect } = props[prop];
       this.addPropertyAccessor(target, prop, type, value, reflect);
     }
+    target.__initialized = true;
   }
 
   static addPropertyAccessor(target, prop, type, defaultValue, reflect) {
     const symbol = Symbol.for(prop);
     const attr = this.camelToDashCase(prop);
-    // capture the property value prior to creating the accessor functions
+    // Capture the property value prior to creating the accessor functions
     const initialValue = target[prop];
 
     Object.defineProperty(target, prop, {
@@ -111,19 +120,19 @@ export default class AbstractPropertiesElement extends XElementBasic {
       },
     });
 
-    // process possible sources of initial state
-    if (target.hasAttribute(prop)) {
-      // read attributes configured before the accessor functions exist as
-      // these values were not yet passed through the property -> attribute path.
-      // e.g. <element prop="initialValue"></element>
-      target[prop] = this.deserialize(attr, target.getAttribute(attr), type);
-    } else if (initialValue !== undefined) {
+    // Process possible sources of initial state, with this priority:
+    // 1. imperative, e.g. `element.prop = 'value';`
+    // 2. declarative, e.g. `<element prop="value"></element>`
+    // 3. definition, e.g. `properties: { prop: { value: 'value' } }`
+    if (initialValue !== undefined) {
       // pass user provided initial state through the accessor
-      // e.g. element.prop = 'initialValue'
       target[prop] = initialValue;
+    } else if (target.hasAttribute(prop)) {
+      // Read attributes configured before the accessor functions exist as
+      // these values were not yet passed through the property -> attribute path
+      target[prop] = this.deserialize(attr, target.getAttribute(attr), type);
     } else if (defaultValue !== undefined) {
       // pass element default through the accessor
-      // e.g. `properties: { prop: { value: 'initialValue' } }`
       target[prop] = defaultValue;
     }
   }
@@ -143,13 +152,11 @@ export default class AbstractPropertiesElement extends XElementBasic {
   static deserialize(attr, value, type) {
     if (value === 'undefined') {
       return undefined;
-    }
-
-    if (type.name === 'Boolean') {
+    } else if (type.name === 'Boolean') {
       return value === '' || value === 'true' || value === attr;
+    } else {
+      return value;
     }
-
-    return value;
   }
 
   static dashToCamelCase(dash) {

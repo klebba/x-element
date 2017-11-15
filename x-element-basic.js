@@ -24,11 +24,11 @@ export default class AbstractBasicElement extends HTMLElement {
    * All the changes will be batched in a single render.
    */
   async invalidate() {
-    if (!this._needsRender) {
-      this._needsRender = true;
+    if (!this.__needsRender) {
+      this.__needsRender = true;
       // schedule microtask, which runs before requestAnimationFrame
       // https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/
-      this._needsRender = await false;
+      this.__needsRender = await false;
       this.render();
     }
   }

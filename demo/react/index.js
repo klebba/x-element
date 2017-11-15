@@ -13,11 +13,11 @@ class Hello extends React.Component {
 }
 
 ready(document).then(() => {
-  const root = document.getElementById('root');
-  ReactDOM.render(React.createElement(Hello, {}, null), root);
-
   const ranks = ['\u2655', '\u2654', '\u2656', '\u2657', ''];
   let counter = 0;
+
+  const root = document.getElementById('root');
+  ReactDOM.render(React.createElement(Hello, { rank: ranks[0] }, null), root);
 
   setInterval(() => {
     const rank = ranks[counter % ranks.length];

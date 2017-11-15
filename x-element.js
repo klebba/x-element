@@ -10,8 +10,7 @@ import { repeat } from '../../lit-html/lib/repeat.js';
 export default class AbstractElement extends XElementProperties {
   render() {
     const tmpl = this.constructor.template(html, repeat);
-    const result = tmpl(this);
-    render(result, this.shadowRoot);
+    render(tmpl(this), this.shadowRoot);
   }
 
   static template(html, repeat) {
