@@ -9,9 +9,9 @@ import { repeat } from '../../lit-html/lib/repeat.js';
 
 export default class AbstractElement extends XElementProperties {
   render() {
-    // apply the props to the template, then render it to the shadowRoot
     const tmpl = this.constructor.template(html, repeat);
-    render(tmpl(this), this.shadowRoot);
+    const result = tmpl(this);
+    render(result, this.shadowRoot);
   }
 
   static template(html, repeat) {

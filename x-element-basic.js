@@ -15,22 +15,21 @@ export default class AbstractBasicElement extends HTMLElement {
   }
 
   render() {
-    // apply the props to the template literal, then insert it in the shadowRoot
     this.shadowRoot.innerHTML = this.constructor.template()(this);
   }
 
   /**
    * Used to flag element for async template render. This prevents the template
    * from rendering more than once for multiple synchronous property changes.
-   * Effectively batching all the changes in a single render.
+   * All the changes will be batched in a single render.
    */
-  invalidate() {
+  async invalidate() {
     if (!this._needsRender) {
       this._needsRender = true;
-      this.async(() => {
-        this._needsRender = false;
-        this.render();
-      });
+      // schedule microtask, which runs before requestAnimationFrame
+      // https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/
+      this._needsRender = await false;
+      this.render();
     }
   }
 
@@ -58,20 +57,9 @@ export default class AbstractBasicElement extends HTMLElement {
       error: err,
       message: err.message,
       bubbles: true,
+      composed: true,
     });
     this.dispatchEvent(evt);
-  }
-
-  /**
-   * Microtask helper
-   * @see https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/
-   */
-  async(callback) {
-    if (callback instanceof Function) {
-      Promise.resolve().then(() => {
-        callback();
-      });
-    }
   }
 
   static template() {
