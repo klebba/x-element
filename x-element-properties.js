@@ -127,7 +127,7 @@ export default class AbstractPropertiesElement extends XElementBasic {
     if (initialValue !== undefined) {
       // pass user provided initial state through the accessor
       target[prop] = initialValue;
-    } else if (target.hasAttribute(prop)) {
+    } else if (target.hasAttribute(attr)) {
       // Read attributes configured before the accessor functions exist as
       // these values were not yet passed through the property -> attribute path
       target[prop] = this.deserialize(attr, target.getAttribute(attr), type);
