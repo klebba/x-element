@@ -3,7 +3,7 @@
 A base class for creating Custom Elements. Adapted from https://github.com/kenchris/lit-element
 
 ```
-npm install && npm start
+yarn install && yarn start
 ```
 
 Then...

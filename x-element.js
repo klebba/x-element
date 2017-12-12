@@ -1,4 +1,8 @@
 /**
+ * Base class for custom elements.
+ *
+ * Extends XElementBasic and XElementProperties
+ *
  * Introduces template rendering using the `lit-html` library for improved
  * performance and added functionality.
  */
