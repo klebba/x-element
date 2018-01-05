@@ -3,11 +3,23 @@ import './fixture-element-basic.js';
 
 suite('x-element basic', ctx => {
   const el = document.createElement('test-element-basic');
-  it('upgrades the element with a shadowRoot', el.shadowRoot instanceof DocumentFragment);
+  it(
+    'upgrades the element with a shadowRoot',
+    el.shadowRoot instanceof DocumentFragment
+  );
   ctx.body.appendChild(el);
-  it('renders the template with variables', el.shadowRoot.querySelector('span').textContent === 'Hello world.');
-  it('has correct innerHTML', el.shadowRoot.innerHTML.trim() === '<span>Hello world.</span>');
-  it('has override value after connected', el.overrideProperty === 'overridden');
+  it(
+    'renders the template with variables',
+    el.shadowRoot.querySelector('span').textContent === 'Hello world.'
+  );
+  it(
+    'has correct innerHTML',
+    el.shadowRoot.innerHTML.trim() === '<span>Hello world.</span>'
+  );
+  it(
+    'has override value after connected',
+    el.overrideProperty === 'overridden'
+  );
 });
 
 suite('x-element basic (Boolean)', ctx => {

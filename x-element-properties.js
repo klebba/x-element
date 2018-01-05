@@ -4,7 +4,7 @@
 
 import XElementBasic from './x-element-basic.js';
 
-const caseMap = {};
+const caseMap = new Map();
 const DASH_TO_CAMEL = /-[a-z]/g;
 const CAMEL_TO_DASH = /([A-Z])/g;
 
@@ -26,13 +26,17 @@ export default class AbstractPropertiesElement extends XElementBasic {
       // Keeping properties in sync with attributes is less confusing too.
       // NOTE: initial attribute values are processed in `connectedCallback`
       if (this.propertiesInitialized) {
-        this[prop] = this.constructor.deserialize(attr, newValue, type);
+        this[prop] = this.constructor.deserializeAttribute(
+          attr,
+          newValue,
+          type
+        );
       }
     }
   }
 
   get propertiesInitialized() {
-    return this.__initialized;
+    return this[Symbol.for('__initialized__')];
   }
 
   static get properties() {
@@ -54,10 +58,10 @@ export default class AbstractPropertiesElement extends XElementBasic {
     // Configure user defined property getter/setters
     const props = target.constructor.properties;
     for (const prop in props) {
-      const { type, value, reflect } = props[prop];
+      const { type, value, reflectToAttribute: reflect } = props[prop];
       this.addPropertyAccessor(target, prop, type, value, reflect);
     }
-    target.__initialized = true;
+    target[Symbol.for('__initialized__')] = true;
   }
 
   static addPropertyAccessor(target, prop, type, defaultValue, reflect) {
@@ -68,52 +72,17 @@ export default class AbstractPropertiesElement extends XElementBasic {
 
     Object.defineProperty(target, prop, {
       get() {
-        if (reflect) {
-          if (type.name === 'Boolean') {
-            return target.hasAttribute(attr);
-          } else if (type.name === 'String') {
-            return type(target.getAttribute(attr) || '');
-          } else if (type.name === 'Number') {
-            return type(target.getAttribute(attr));
-          } else {
-            console.warn(`
-              Attempted to read "${prop}" as a reflected property,
-              but it is not a Boolean, String, or Number type.
-            `);
-          }
-        } else {
-          return target[symbol];
-        }
+        return target[symbol];
       },
       set(valueOrFn) {
         // Resolve values passed as functions
         const value = valueOrFn instanceof Function ? valueOrFn() : valueOrFn;
         // Apply the user-provided type function
-        const result = this.constructor.coerce(value, type);
+        const result = this.constructor.applyType(value, type);
+        // Save the typed result
+        target[symbol] = result;
         if (reflect) {
-          if (type.name === 'Boolean') {
-            if (result) {
-              target.setAttribute(attr, '');
-            } else {
-              target.removeAttribute(attr);
-            }
-          } else if (type.name === 'String' || type.name === 'Number') {
-            const isUndefined = value === undefined;
-            const isNull = Object.is(value, null);
-            const shouldReflect = !isUndefined && !isNull;
-            if (shouldReflect) {
-              target.setAttribute(attr, result);
-            } else {
-              target.removeAttribute(attr);
-            }
-          } else {
-            console.warn(`
-              Attempted to write "${prop}" as a reflected property,
-              but it is not a Boolean, String, or Number type.
-            `);
-          }
-        } else {
-          target[symbol] = result;
+          this.constructor.reflectProperty(target, attr, type, result);
         }
         // mark template dirty
         target.invalidate();
@@ -130,49 +99,86 @@ export default class AbstractPropertiesElement extends XElementBasic {
     } else if (target.hasAttribute(attr)) {
       // Read attributes configured before the accessor functions exist as
       // these values were not yet passed through the property -> attribute path
-      target[prop] = this.deserialize(attr, target.getAttribute(attr), type);
+      target[prop] = this.deserializeAttribute(
+        attr,
+        target.getAttribute(attr),
+        type
+      );
     } else if (defaultValue !== undefined) {
       // pass element default through the accessor
       target[prop] = defaultValue;
     }
   }
 
-  static coerce(value, type) {
+  static reflectProperty(target, attr, type, value) {
+    if (type.name === 'Boolean') {
+      if (value) {
+        target.setAttribute(attr, '');
+      } else {
+        target.removeAttribute(attr);
+      }
+    } else if (type.name === 'String' || type.name === 'Number') {
+      // avoid reflecting non-values
+      if (value === undefined || Object.is(value, null)) {
+        target.removeAttribute(attr);
+      } else {
+        target.setAttribute(attr, value);
+      }
+    } else {
+      const message =
+        `Attempted to write "${attr}" as a reflected attribute, ` +
+        `but it is not a Boolean, String, or Number type.`;
+      target.dispatchError(new Error(message));
+    }
+  }
+
+  static applyType(value, type) {
+    // null remains null
+    if (Object.is(value, null)) {
+      return null;
+    }
+    // undefined remains undefined
+    if (value === undefined) {
+      return undefined;
+    }
+    // only valid arrays (no coercion)
     if (type.name === 'Array') {
       return Array.isArray(value) ? value : null;
-    } else if (type.name === 'Object') {
+    }
+    // only valid objects (no coercion)
+    if (type.name === 'Object') {
       return Object.prototype.toString.call(value) === '[object Object]'
         ? value
         : null;
-    } else {
-      return type(value);
     }
+    return type(value);
   }
 
-  static deserialize(attr, value, type) {
-    if (value === 'undefined') {
-      return undefined;
-    } else if (type.name === 'Boolean') {
-      return value === '' || value === 'true' || value === attr;
-    } else {
-      return value;
+  static deserializeAttribute(attr, value, type) {
+    // per the HTML spec, every value other than null
+    // is considered true for boolean attributes
+    if (type.name === 'Boolean') {
+      return Object.is(value, null) === false;
     }
+    return value;
   }
 
   static dashToCamelCase(dash) {
-    return (
-      caseMap[dash] ||
-      (caseMap[dash] =
+    if (caseMap.has(dash) === false) {
+      const camel =
         dash.indexOf('-') < 0
           ? dash
-          : dash.replace(DASH_TO_CAMEL, m => m[1].toUpperCase()))
-    );
+          : dash.replace(DASH_TO_CAMEL, m => m[1].toUpperCase());
+      caseMap.set(dash, camel);
+    }
+    return caseMap.get(dash);
   }
 
   static camelToDashCase(camel) {
-    return (
-      caseMap[camel] ||
-      (caseMap[camel] = camel.replace(CAMEL_TO_DASH, '-$1').toLowerCase())
-    );
+    if (caseMap.has(camel) === false) {
+      const dash = camel.replace(CAMEL_TO_DASH, '-$1').toLowerCase();
+      caseMap.set(camel, dash);
+    }
+    return caseMap.get(camel);
   }
 }

@@ -14,10 +14,11 @@ import { repeat } from '../../lit-html/lib/repeat.js';
 export default class AbstractElement extends XElementProperties {
   render() {
     const tmpl = this.constructor.template(html, repeat);
-    render(tmpl(this), this.shadowRoot);
+    const proxy = this.constructor.renderProxy(this);
+    render(tmpl(proxy, this), this.shadowRoot);
   }
-
+  /* eslint-disable no-shadow, no-unused-vars */
   static template(html, repeat) {
-    return () => html``;
+    return (proxy, original) => html``;
   }
 }

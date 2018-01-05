@@ -12,60 +12,60 @@ class TestElement extends XElement {
       // reflected with no value
       prop1: {
         type: String,
-        reflect: true,
+        reflectToAttribute: true,
       },
       // reflected with falsy initial value (null)
       prop2: {
         type: String,
         value: null,
-        reflect: true,
+        reflectToAttribute: true,
       },
       // reflected with falsy initial value (undefined)
       prop3: {
         type: String,
         value: null,
-        reflect: true,
+        reflectToAttribute: true,
       },
       // reflected with falsy initial value (false)
       prop4: {
         type: String,
         value: false,
-        reflect: true,
+        reflectToAttribute: true,
       },
       // reflected with initial value
       prop5: {
         type: String,
         value: 'test',
-        reflect: true,
+        reflectToAttribute: true,
       },
       // Boolean without initial value
       prop6: {
         type: Boolean,
-        reflect: true,
+        reflectToAttribute: true,
       },
       // Boolean with `false` initial value
       prop7: {
         type: Boolean,
         value: false,
-        reflect: true,
+        reflectToAttribute: true,
       },
       // Boolean with `true` initial value
       prop8: {
         type: Boolean,
         value: true,
-        reflect: true,
+        reflectToAttribute: true,
       },
       // Boolean with truthy initial value (String)
       prop9: {
         type: Boolean,
         value: 'ok',
-        reflect: true,
+        reflectToAttribute: true,
       },
       // Boolean with falsy initial value (Number)
       prop10: {
         type: Boolean,
         value: 0,
-        reflect: true,
+        reflectToAttribute: true,
       },
       arrayProp: {
         type: Array,
@@ -73,6 +73,13 @@ class TestElement extends XElement {
       },
       objProp: {
         type: Object,
+        value: () => {
+          return { foo: 'bar' };
+        },
+      },
+      objPropReflect: {
+        type: Object,
+        reflectToAttribute: true,
         value: () => {
           return { foo: 'bar' };
         },

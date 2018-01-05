@@ -6,7 +6,7 @@ export default class AbstractBasicElement extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
-    // cause the template to perform an initial render
+    // cause the template to perform an initial synchronous render
     this.render();
   }
 
@@ -15,7 +15,8 @@ export default class AbstractBasicElement extends HTMLElement {
   }
 
   render() {
-    this.shadowRoot.innerHTML = this.constructor.template()(this);
+    const proxy = this.constructor.renderProxy(this);
+    this.shadowRoot.innerHTML = this.constructor.template()(proxy, this);
   }
 
   /**
@@ -24,11 +25,12 @@ export default class AbstractBasicElement extends HTMLElement {
    * All the changes will be batched in a single render.
    */
   async invalidate() {
-    if (!this.__needsRender) {
-      this.__needsRender = true;
+    const symbol = Symbol.for('__dirty__');
+    if (!this[symbol]) {
+      this[symbol] = true;
       // schedule microtask, which runs before requestAnimationFrame
       // https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/
-      this.__needsRender = await false;
+      this[symbol] = await false;
       this.render();
     }
   }
@@ -49,9 +51,6 @@ export default class AbstractBasicElement extends HTMLElement {
     }
   }
 
-  /**
-   * @see https://html.spec.whatwg.org/multipage/webappapis.html#erroreventinit
-   */
   dispatchError(err) {
     const evt = new ErrorEvent('error', {
       error: err,
@@ -60,6 +59,18 @@ export default class AbstractBasicElement extends HTMLElement {
       composed: true,
     });
     this.dispatchEvent(evt);
+  }
+
+  static renderProxy(target) {
+    const handler = {
+      get(host, key) {
+        // avoid rendering "null" and "undefined" strings in template,
+        // treat as empty instead
+        const value = host[key];
+        return value === undefined || Object.is(value, null) ? '' : value;
+      },
+    };
+    return new Proxy(target, handler);
   }
 
   static template() {

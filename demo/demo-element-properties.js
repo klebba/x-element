@@ -25,11 +25,11 @@ class DemoPropertiesElement extends XElementProperties {
     return {
       reflected: {
         type: String,
-        reflect: true,
+        reflectToAttribute: true,
       },
       booleanValue: {
         type: Boolean,
-        reflect: true,
+        reflectToAttribute: true,
         value: true,
       },
     };
