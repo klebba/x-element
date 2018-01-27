@@ -17,6 +17,7 @@ export default class AbstractElement extends XElementProperties {
     const proxy = this.constructor.renderProxy(this);
     render(tmpl(proxy, this), this.shadowRoot);
   }
+
   /* eslint-disable no-shadow, no-unused-vars */
   static template(html, repeat) {
     return (proxy, original) => html``;
