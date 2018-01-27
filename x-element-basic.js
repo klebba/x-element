@@ -14,6 +14,12 @@ export default class AbstractBasicElement extends HTMLElement {
     this.constructor.upgradeObservedAttributes(this);
   }
 
+  disconnectedCallback() {}
+
+  attributeChangedCallback() {}
+
+  adoptedCallback() {}
+
   render() {
     const proxy = this.constructor.renderProxy(this);
     this.shadowRoot.innerHTML = this.constructor.template()(proxy, this);

@@ -84,6 +84,18 @@ class TestElement extends XElement {
           return { foo: 'bar' };
         },
       },
+      objDateProp: {
+        type: Date,
+        value: () => {
+          return new Date();
+        },
+      },
+      objMapProp: {
+        type: Map,
+        value: () => {
+          return new Map();
+        },
+      },
     };
   }
 }

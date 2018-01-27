@@ -79,8 +79,12 @@ suite('scratch', ctx => {
 
   // complex properties
   it(
-    'should allow array types',
+    'should allow Array types',
     Array.isArray(el.arrayProp) && el.arrayProp[0] === 'foo'
   );
-  it('should allow object types', el.objProp.foo === 'bar');
+  it('should allow Object types', el.objProp.foo === 'bar');
+
+  it('should allow Date types', el.objDateProp.getFullYear() > 2017);
+
+  it('should allow Map types', el.objMapProp.has('foo') === false);
 });

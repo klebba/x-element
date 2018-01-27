@@ -16,7 +16,8 @@ export default class AbstractPropertiesElement extends XElementBasic {
     this.constructor.initializeProperties(this);
   }
 
-  attributeChangedCallback(attr, oldValue, newValue) {
+  attributeChangedCallback(attr, oldValue, newValue, ns) {
+    super.attributeChangedCallback(attr, oldValue, newValue, ns);
     if (newValue !== oldValue) {
       const props = this.constructor.properties;
       const prop = this.constructor.dashToCamelCase(attr);
@@ -127,7 +128,7 @@ export default class AbstractPropertiesElement extends XElementBasic {
     } else {
       const message =
         `Attempted to write "${attr}" as a reflected attribute, ` +
-        `but it is not a Boolean, String, or Number type.`;
+        `but it is not a Boolean, String, or Number type (${type.name}).`;
       target.dispatchError(new Error(message));
     }
   }
@@ -151,7 +152,8 @@ export default class AbstractPropertiesElement extends XElementBasic {
         ? value
         : null;
     }
-    return type(value);
+    // otherwise coerce type as needed
+    return value instanceof type ? value : type(value);
   }
 
   static deserializeAttribute(attr, value, type) {
