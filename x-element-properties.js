@@ -18,21 +18,15 @@ export default class AbstractPropertiesElement extends XElementBasic {
 
   attributeChangedCallback(attr, oldValue, newValue, ns) {
     super.attributeChangedCallback(attr, oldValue, newValue, ns);
-    if (newValue !== oldValue) {
-      const props = this.constructor.properties;
-      const prop = this.constructor.dashToCamelCase(attr);
-      const type = props[prop].type;
+    if (newValue !== oldValue && this.propertiesInitialized) {
       // Ensure all attribute changes are processed by property accessors.
       // This is required for frameworks which set attributes instead of props.
       // Keeping properties in sync with attributes is less confusing too.
       // NOTE: initial attribute values are processed in `connectedCallback`
-      if (this.propertiesInitialized) {
-        this[prop] = this.constructor.deserializeAttribute(
-          attr,
-          newValue,
-          type
-        );
-      }
+      const props = this.constructor.properties;
+      const prop = this.constructor.dashToCamelCase(attr);
+      const type = props[prop].type;
+      this[prop] = this.constructor.deserializeAttribute(attr, newValue, type);
     }
   }
 
