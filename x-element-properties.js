@@ -64,6 +64,7 @@ export default class AbstractPropertiesElement extends XElementBasic {
     const attr = this.camelToDashCase(prop);
     // Capture the property value prior to creating the accessor functions
     const initialValue = target[prop];
+    Reflect.deleteProperty(target, prop);
 
     Object.defineProperty(target, prop, {
       get() {

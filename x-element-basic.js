@@ -42,19 +42,23 @@ export default class AbstractBasicElement extends HTMLElement {
   }
 
   listen(el, type, cb) {
-    if (el instanceof HTMLElement && type && cb instanceof Function) {
+    if (el instanceof EventTarget && type && cb instanceof Function) {
       const bound = this[cb.name].bind(this);
       el.addEventListener(type, bound);
       // save reference to instance bound function
       this[Symbol.for(cb.name)] = bound;
+      return true;
     }
+    return false;
   }
 
   unlisten(el, type, cb) {
     const bound = this[Symbol.for(cb.name)];
     if (bound) {
       el.removeEventListener(type, bound);
+      return true;
     }
+    return false;
   }
 
   dispatchError(err) {
