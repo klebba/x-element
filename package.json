@@ -24,7 +24,7 @@
     "/index.css"
   ],
   "dependencies": {
-    "lit-html": "^0.9.0"
+    "lit-html": "^1.0.0-rc.2"
   },
   "devDependencies": {
     "@klebba/element-server": "^1.0.5",

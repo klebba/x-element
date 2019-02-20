@@ -71,6 +71,7 @@ export default class AbstractBasicElement extends HTMLElement {
     this.dispatchEvent(evt);
   }
 
+  // @TODO consider safe deep access using the `resolve` path helper
   static renderProxy(target) {
     const handler = {
       get(host, key) {
@@ -85,6 +86,13 @@ export default class AbstractBasicElement extends HTMLElement {
 
   static template() {
     return () => ``;
+  }
+
+  /**
+   * @see https://medium.com/javascript-inside/safely-accessing-deeply-nested-values-in-javascript-99bf72a0855a
+   */
+  static resolve(target, path, defaultValue = null) {
+    return path.reduce((xs, x) => (xs && xs[x] ? xs[x] : defaultValue), target);
   }
 
   static upgradeObservedAttributes(target) {
